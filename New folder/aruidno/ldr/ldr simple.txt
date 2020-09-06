@@ -1,0 +1,26 @@
+int portaLed = 8; //Port is being used to connect the LED 
+int portaLDR = A0; //Analog port used by LDR
+
+void setup() 
+{ 
+ pinMode(portaLed, OUTPUT); //Sets Led door as output
+ Serial.begin(9600);
+} 
+
+void loop() 
+{ 
+
+ int estado = analogRead(portaLDR); 
+ Serial.println(estado);
+
+
+ if (estado > 800) 
+ { 
+ digitalWrite(portaLed, HIGH); 
+ } 
+ else //Otherwise, the LED goes out
+ { 
+ digitalWrite(portaLed, LOW); 
+ } 
+
+}

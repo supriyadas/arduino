@@ -1,0 +1,38 @@
+#include <LiquidCrystal.h>
+
+int portaLed = 8; //Port is being used to connect the LED 
+int portaLDR = A0; //Analog port used by LDR
+
+const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+
+void setup() 
+{ 
+ pinMode(portaLed, OUTPUT); //Sets Led door as output
+ lcd.begin(16, 2);
+ Serial.begin(9600);
+} 
+
+void loop() 
+{ 
+ int estado = analogRead(portaLDR); 
+ Serial.println(estado);
+
+
+
+ if (estado > 800) 
+ { 
+ digitalWrite(portaLed, HIGH); 
+ lcd.setCursor(0,0);
+   lcd.print("Night"); 
+ } 
+ else //Otherwise, the LED goes out
+ { 
+ digitalWrite(portaLed, LOW); 
+ lcd.setCursor(0,0);
+  
+  lcd.print("Day  ");
+ } 
+
+ delay(1000);
+}

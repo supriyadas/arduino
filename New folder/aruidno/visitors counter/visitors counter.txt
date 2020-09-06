@@ -1,0 +1,50 @@
+#include <LiquidCrystal.h>
+
+int sensor = 6;
+
+const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+int count = 0;
+boolean lastStatus = true;
+
+void setup() 
+{ 
+ pinMode(sensor, INPUT); 
+ lcd.begin(16, 2);
+ 
+ lcd.setCursor(0,0); 
+ lcd.print("WALK");  
+ lcd.setCursor(0,1); 
+ lcd.print("Visitors: "); 
+  lcd.print(count);
+
+      
+ Serial.begin(9600);
+} 
+
+void loop() 
+{ 
+
+if(lastStatus != digitalRead(sensor)){
+  
+  if(!digitalRead(sensor)){
+
+      count++;
+      lastStatus = digitalRead(sensor);
+                  
+      lcd.clear();
+      lcd.setCursor(0,0); 
+      lcd.print("STOP"); 
+
+      lcd.setCursor(0,1); 
+      lcd.print("Visitors: "); 
+      lcd.print(count);
+      
+      delay(1000);
+
+      lcd.setCursor(0,0); 
+      lcd.print("WALK"); 
+    
+  }
+}
+}

@@ -1,0 +1,56 @@
+// defines pins numbers
+const int stepPin_1 = 1; 
+const int dirPin_1 = 2; 
+
+const int stepPin_2 = 3; 
+const int dirPin_2 = 4; 
+
+
+const int enPin = 8;
+const int del = 100;
+void setup() {
+  
+  // Sets the two pins as Outputs
+  pinMode(stepPin_1,OUTPUT); 
+  pinMode(dirPin_1,OUTPUT);
+
+  pinMode(stepPin_2,OUTPUT); 
+  pinMode(dirPin_2,OUTPUT);
+
+  pinMode(enPin,OUTPUT);
+  digitalWrite(enPin,LOW);
+  
+}
+void loop() {
+  
+  digitalWrite(dirPin_1,HIGH); 
+  digitalWrite(dirPin_2,HIGH); 
+
+
+
+for(int x = 0; x < 3200; x++) {
+  digitalWrite(stepPin_1,HIGH); 
+  digitalWrite(stepPin_2,HIGH); 
+  delayMicroseconds(del); 
+  
+  digitalWrite(stepPin_1,LOW); 
+  digitalWrite(stepPin_2,LOW); 
+  delayMicroseconds(del); 
+}
+  
+  delay(1000); // One second delay
+
+ digitalWrite(dirPin_1,LOW); 
+ digitalWrite(dirPin_2,LOW); 
+ for(int x = 0; x < 3200; x++) {
+    digitalWrite(stepPin_1,HIGH); 
+    digitalWrite(stepPin_2,HIGH); 
+    delayMicroseconds(del); 
+    
+    digitalWrite(stepPin_1,LOW); 
+    digitalWrite(stepPin_2,LOW); 
+    delayMicroseconds(del); 
+  }
+  delay(1000);
+  
+}
