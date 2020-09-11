@@ -13,13 +13,14 @@
 
 /*====== System Pin Configuration ======*/
 
-const int M1_IN_1 = D5;
-const int M1_IN_2 = D6;
-const int M2_IN_1 = D7;
-const int M2_IN_2 = D8;
+const int M1_IN_1 = D5; //Left Motor
+const int M1_IN_2 = D6; //Left Motor
+
+const int M2_IN_1 = D7; //Right Motor
+const int M2_IN_2 = D8; //Right Motor
 
 const int BI_LED_PIN = D4;
-const int CT_LED_PIN = D0;
+const int CT_LED_PIN = D4;
 const int BUTTON_PIN = D3;
 
 /*====== System Glaboal variables ======*/
