@@ -1,5 +1,6 @@
 #include <Wire.h>
 #include <NewPing.h>
+#include <SendOnlySoftwareSerial.h>
 
 #define SONAR_NUM 2      // Number of sensors.
 #define MAX_DISTANCE 20 // Maximum distance (in cm) to ping.
@@ -19,6 +20,7 @@ const int motorSpeedPin = 9;
 const int ledPinFront = 13;
 const int ledPinRare  = 12;
 
+SendOnlySoftwareSerial mySerial(6);  // Tx pin
 
 NewPing sonar[SONAR_NUM] = {   // Sensor object array.
   NewPing(3, 2, MAX_DISTANCE), // Each sensor's trigger pin, echo pin, and max distance to ping.
@@ -31,7 +33,7 @@ boolean front_clear = true;
 boolean rear_clear  = true;
 
 int motorSpeed = 255;
-long threshold = 20;
+long threshold = 15;
 long duration, distance, frontSensor, backSensor;
 
 void setup() {
@@ -46,6 +48,7 @@ void setup() {
   pinMode(motorSpeedPin,OUTPUT);
   
   analogWrite(motorSpeedPin, motorSpeed);
+  mySerial.begin(9600);
 }
 
 void loop() {
@@ -64,7 +67,7 @@ void loop() {
   frontSensor = sensors[0];
   backSensor  = sensors[1];
   updateSensorDataToCode();
-  
+  printUltrasonicData();
   /* == Setting up motor speed ==*/
   
   
@@ -107,10 +110,12 @@ void updateSensorDataToCode(){
   if(frontSensor!=0 && frontSensor<threshold){
       front_clear = false;
       digitalWrite(ledPinFront, HIGH);
+      sendObsData();
   }
   if(backSensor!=0 && backSensor<threshold){
       rear_clear = false;
       digitalWrite(ledPinRare, HIGH);
+      sendObsData();
   }
 }
 
@@ -130,6 +135,12 @@ void stopMotorInstantly(){
 
 void releaseMotor(){
   analogWrite(motorSpeedPin, motorSpeed);
+}
+
+void sendObsData(){
+  char us_status[2] = {front_clear ? '1':'0', rear_clear ? '1':'0'};
+  mySerial.print (us_status);
+  delay (100);
 }
 
 void printUltrasonicData(){

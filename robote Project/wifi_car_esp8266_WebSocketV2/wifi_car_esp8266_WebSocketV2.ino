@@ -90,9 +90,7 @@ void setup() {
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
   //timer.setInterval(1000,mainLoop); 
-  tickerMainLoop.attach(.3
-  
-  , mainLoopAutoDetection);
+  tickerMainLoop.attach(.3, mainLoopAutoDetection);
   tickerMainLoop1.attach(1, mainLoopObsFeedback);
   
   /* =====UDP WebSocket setup ======= End ====== */

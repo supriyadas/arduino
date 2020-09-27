@@ -1,4 +1,5 @@
 #include <Wire.h>
+#include <SendOnlySoftwareSerial.h>
 
 // Ultrasonic Front Pins
 const int trigPin1 = 3;
@@ -23,6 +24,8 @@ int motorSpeed = 255;
 long threshold = 20;
 long duration, distance, frontSensor, backSensor;
 
+SendOnlySoftwareSerial mySerial(6);  // Tx pin
+
 void setup() {
 
   Wire.begin(8);               
@@ -44,7 +47,8 @@ void setup() {
   pinMode(motorSpeedPin, OUTPUT);
   analogWrite(motorSpeedPin, motorSpeed);
   
-  Serial.begin(9600);
+  Serial.begin(115200);
+  mySerial.begin(115200);
 }
 
 void loop() {
@@ -84,9 +88,7 @@ void receiveEvent(int howMany) {
      setMotorSpeed(c);
      i++;
     }
-    //Serial.print(c);           /* print the character */
   }
-  //Serial.println();             /* to newline */
 }
 
 
@@ -111,10 +113,12 @@ void updateSensorDataToCode(){
   if(frontSensor!=0 && frontSensor<threshold){
       front_clear = false;
       digitalWrite(ledPinFront, HIGH);
+      sendObsData();
   }
   if(backSensor!=0 && backSensor<threshold){
       rear_clear = false;
       digitalWrite(ledPinRare, HIGH);
+      sendObsData();
   }
   
 }
@@ -127,7 +131,11 @@ void setMotorSpeed(char c) {
   else if(c=='5') motorSpeed = 255;
   Serial.println(motorSpeed);
 }
-
+void sendObsData(){
+  char us_status[2] = {front_clear ? '1':'0', rear_clear ? '1':'0'};
+  mySerial.print (us_status);
+  delay (100);
+}
 void printUltrasonicData(){
   Serial.println(frontSensor);
   Serial.print(" - ");
