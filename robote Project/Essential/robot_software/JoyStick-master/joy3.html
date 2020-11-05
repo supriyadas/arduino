@@ -1,0 +1,592 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+    <title>Robo Rob Dashboard</title>
+
+	<script  type="text/javascript">	
+	var JoyStick = (function(container, parameters)
+		{
+			parameters = parameters || {};
+			var title = (typeof parameters.title === "undefined" ? "joystick" : parameters.title),
+				width = (typeof parameters.width === "undefined" ? 0 : parameters.width),
+				height = (typeof parameters.height === "undefined" ? 0 : parameters.height),
+				internalFillColor = (typeof parameters.internalFillColor === "undefined" ? "#5BC5AE" : parameters.internalFillColor),
+				internalLineWidth = (typeof parameters.internalLineWidth === "undefined" ? 4 : parameters.internalLineWidth),
+				internalStrokeColor = (typeof parameters.internalStrokeColor === "undefined" ? "#A8B1B0" : parameters.internalStrokeColor),
+				externalLineWidth = (typeof parameters.externalLineWidth === "undefined" ? 4 : parameters.externalLineWidth),
+				externalStrokeColor = (typeof parameters.externalStrokeColor ===  "undefined" ? "#1A1B1F" : parameters.externalStrokeColor),
+				autoReturnToCenter = (typeof parameters.autoReturnToCenter === "undefined" ? true : parameters.autoReturnToCenter);
+			
+			// Create Canvas element and add it in the Container object
+			var objContainer = document.getElementById(container);
+			var canvas = document.createElement("canvas");
+			canvas.id = title;
+			if(width === 0) { width = objContainer.clientWidth; }
+			if(height === 0) { height = objContainer.clientHeight; }
+			canvas.width = width;
+			canvas.height = height;
+			objContainer.appendChild(canvas);
+			var context=canvas.getContext("2d");
+			
+			var pressed = 0; // Bool - 1=Yes - 0=No
+			var circumference = 2 * Math.PI;
+			var internalRadius = (canvas.width-((canvas.width/2)+10))/2;
+			var maxMoveStick = internalRadius + 5;
+			var externalRadius = internalRadius + 30;
+			var centerX = canvas.width / 2;
+			var centerY = canvas.height / 2;
+			var directionHorizontalLimitPos = canvas.width / 10;
+			var directionHorizontalLimitNeg = directionHorizontalLimitPos * -1;
+			var directionVerticalLimitPos = canvas.height / 10;
+			var directionVerticalLimitNeg = directionVerticalLimitPos * -1;
+			// Used to save current position of stick
+			var movedX=centerX;
+			var movedY=centerY;
+				
+			// Check if the device support the touch or not
+			if("ontouchstart" in document.documentElement)
+			{
+				canvas.addEventListener("touchstart", onTouchStart, false);
+				canvas.addEventListener("touchmove", onTouchMove, false);
+				canvas.addEventListener("touchend", onTouchEnd, false);
+			}
+			else
+			{
+				canvas.addEventListener("mousedown", onMouseDown, false);
+				canvas.addEventListener("mousemove", onMouseMove, false);
+				canvas.addEventListener("mouseup", onMouseUp, false);
+			}
+			// Draw the object
+			drawExternal();
+			drawInternal();
+
+			/******************************************************
+			 * Private methods
+			 *****************************************************/
+
+			/**
+			 * @desc Draw the external circle used as reference position
+			 */
+			function drawExternal()
+			{
+				context.beginPath();
+				context.arc(centerX, centerY, externalRadius, 0, circumference, false);
+				context.lineWidth = externalLineWidth;
+				context.strokeStyle = externalStrokeColor;
+				context.stroke();
+			}
+
+			/**
+			 * @desc Draw the internal stick in the current position the user have moved it
+			 */
+			function drawInternal()
+			{
+				context.beginPath();
+				if(movedX<internalRadius) { movedX=maxMoveStick; }
+				if((movedX+internalRadius) > canvas.width) { movedX = canvas.width-(maxMoveStick); }
+				if(movedY<internalRadius) { movedY=maxMoveStick; }
+				if((movedY+internalRadius) > canvas.height) { movedY = canvas.height-(maxMoveStick); }
+
+				context.arc(movedX, movedY, internalRadius, 0, circumference, false);
+			
+				// create radial gradient
+				var grd = context.createRadialGradient(centerX, centerY, 5, centerX, centerY, 200);
+				// Light color
+				grd.addColorStop(0, internalFillColor);
+				// Dark color
+				grd.addColorStop(1, internalStrokeColor);
+				context.fillStyle = grd;
+				context.fill();
+				context.lineWidth = internalLineWidth;
+				context.strokeStyle = internalStrokeColor;
+				context.stroke();
+			}
+			
+			/**
+			 * @desc Events for manage touch
+			 */
+			function onTouchStart(event) 
+			{
+				pressed = 1;
+			}
+
+			function onTouchMove(event)
+			{
+				// Prevent the browser from doing its default thing (scroll, zoom)
+				event.preventDefault();
+				if(pressed === 1 && event.targetTouches[0].target === canvas)
+				{
+					movedX = event.targetTouches[0].pageX;
+					movedY = event.targetTouches[0].pageY;
+					// Manage offset
+					if(canvas.offsetParent.tagName.toUpperCase() === "BODY")
+					{
+						movedX -= canvas.offsetLeft;
+						movedY -= canvas.offsetTop;
+					}
+					else
+					{
+						movedX -= canvas.offsetParent.offsetLeft;
+						movedY -= canvas.offsetParent.offsetTop;
+					}
+					// Delete canvas
+					context.clearRect(0, 0, canvas.width, canvas.height);
+					// Redraw object
+					drawExternal();
+					drawInternal();
+				}
+			} 
+
+			function onTouchEnd(event) 
+			{
+				pressed = 0;
+				// If required reset position store variable
+				if(autoReturnToCenter)
+				{
+					movedX = centerX;
+					movedY = centerY;
+				}
+				// Delete canvas
+				context.clearRect(0, 0, canvas.width, canvas.height);
+				// Redraw object
+				drawExternal();
+				drawInternal();
+				//canvas.unbind('touchmove');
+			}
+
+			/**
+			 * @desc Events for manage mouse
+			 */
+			function onMouseDown(event) 
+			{
+				pressed = 1;
+			}
+
+			function onMouseMove(event) 
+			{
+				if(pressed === 1)
+				{
+					movedX = event.pageX;
+					movedY = event.pageY;
+					// Manage offset
+					if(canvas.offsetParent.tagName.toUpperCase() === "BODY")
+					{
+						movedX -= canvas.offsetLeft;
+						movedY -= canvas.offsetTop;
+					}
+					else
+					{
+						movedX -= canvas.offsetParent.offsetLeft;
+						movedY -= canvas.offsetParent.offsetTop;
+					}
+					// Delete canvas
+					context.clearRect(0, 0, canvas.width, canvas.height);
+					// Redraw object
+					drawExternal();
+					drawInternal();
+				}
+			}
+
+			function onMouseUp(event) 
+			{
+				pressed = 0;
+				// If required reset position store variable
+				if(autoReturnToCenter)
+				{
+					movedX = centerX;
+					movedY = centerY;
+				}
+				// Delete canvas
+				context.clearRect(0, 0, canvas.width, canvas.height);
+				// Redraw object
+				drawExternal();
+				drawInternal();
+				//canvas.unbind('mousemove');
+			}
+
+			/******************************************************
+			 * Public methods
+			 *****************************************************/
+			
+			/**
+			 * @desc The width of canvas
+			 * @return Number of pixel width 
+			 */
+			this.GetWidth = function () 
+			{
+				return canvas.width;
+			};
+			
+			/**
+			 * @desc The height of canvas
+			 * @return Number of pixel height
+			 */
+			this.GetHeight = function () 
+			{
+				return canvas.height;
+			};
+			
+			/**
+			 * @desc The X position of the cursor relative to the canvas that contains it and to its dimensions
+			 * @return Number that indicate relative position
+			 */
+			this.GetPosX = function ()
+			{
+				return movedX;
+			};
+			
+			/**
+			 * @desc The Y position of the cursor relative to the canvas that contains it and to its dimensions
+			 * @return Number that indicate relative position
+			 */
+			this.GetPosY = function ()
+			{
+				return movedY;
+			};
+			
+			/**
+			 * @desc Normalizzed value of X move of stick
+			 * @return Integer from -100 to +100
+			 */
+			this.GetX = function ()
+			{
+				return (100*((movedX - centerX)/maxMoveStick)).toFixed();
+			};
+
+			/**
+			 * @desc Normalizzed value of Y move of stick
+			 * @return Integer from -100 to +100
+			 */
+			this.GetY = function ()
+			{
+				return ((100*((movedY - centerY)/maxMoveStick))*-1).toFixed();
+			};
+			
+			/**
+			 * @desc Get the direction of the cursor as a string that indicates the cardinal points where this is oriented
+			 * @return String of cardinal point N, NE, E, SE, S, SW, W, NW and C when it is placed in the center
+			 */
+			this.GetDir = function()
+			{
+				var result = "";
+				var orizontal = movedX - centerX;
+				var vertical = movedY - centerY;
+				
+				if(vertical >= directionVerticalLimitNeg && vertical <= directionVerticalLimitPos)
+				{
+					result = "S";
+				}
+				if(vertical < directionVerticalLimitNeg)
+				{
+					result = "F";
+				}
+				if(vertical > directionVerticalLimitPos)
+				{
+					result = "B";
+				}
+				
+				if(orizontal < directionHorizontalLimitNeg)
+				{
+					if(result === "S")
+					{ 
+						result = "L";
+					}
+					else
+					{
+						result += "L";
+					}
+				}
+				if(orizontal > directionHorizontalLimitPos)
+				{
+					if(result === "S")
+					{ 
+						result = "R";
+					}
+					else
+					{
+						result += "R";
+					}
+				}
+				
+				return result;
+			};
+		});
+	</script>
+	
+	<style>
+	body{
+		background-color: #212226;
+	}
+	.container{
+		width: 200px;
+		margin: 0 auto;
+	}
+	.slider {
+	  -webkit-appearance: none;
+	  width: 100%;
+	  height: 15px;
+	  border-radius: 5px;  
+	  background: #1A1B1F;
+	  outline: none;
+
+	  -webkit-transition: .2s;
+	  transition: opacity .2s;
+	}
+
+	.slider::-webkit-slider-thumb {
+	  -webkit-appearance: none;
+	  appearance: none;
+	  width: 25px;
+	  height: 25px;
+	  border-radius: 50%; 
+	  background: #5BC5AE;
+	  cursor: pointer;
+	}
+
+	.slider::-moz-range-thumb {
+		width: 25px;
+		height: 25px;
+		border-radius: 50%;
+		background: #5BC5AE;
+		cursor: pointer;
+	}
+	#joyDiv{
+		width:200px;height:200px;
+	}
+	#spped{
+		width: 100%;
+	}
+	.button {
+		border: none;
+		color: white;
+		padding: 5px 10px;
+		text-align: center;
+		text-decoration: none;
+		display: inline-block;
+		font-size: 16px;
+		margin: 4px 2px;
+		transition-duration: 0.4s;
+		cursor: pointer;
+		font-family: arial;
+		font-size: .7pc;
+	}
+	
+	.button1 {
+		width: 100%;
+	 background-color: #018786;
+	  color: white;
+
+	  border: 2px solid #018786;
+	}
+	.button1:hover {
+	  background-color: white; 
+	  color: black; 
+	}
+	
+	.button2 {background-color: #4CAF50;} 
+	.button3 {background-color: #f44336;} 
+
+	input[type=text] {
+		width: 100%;
+		padding: 7px 3px;
+		margin: 8px 0;
+		box-sizing: border-box;
+		border: none;
+		background-color: #234A42;
+		color: white;
+		text-align: center;
+		font-size: .7pc;
+	}
+	.obs{
+		width: 15px;
+		height: 15px;
+		background-color: green;
+		display: inline-table;
+		border-radius: 50%;
+	}
+	.obs_text{
+		color: #a8b1b07d;
+		text-transform: uppercase;
+		font-size: .7pc;
+	}
+	#connection_status{
+		width: 200px;
+		height: 15px;
+		color: #a8b1b0;
+		font-family: arial;
+		font-size: .8pc;
+		text-align: center;
+	}
+	#connection{
+		color:red;
+	}
+	.obs_table{
+		width: 100%;
+		text-align: center;
+		font-family: arial;
+
+	}
+	#obs_options{
+		background-color: #1a1b1f;
+		margin-top: 20px;
+		margin-bottom: 10px;
+		color: #a8b1b0;
+	}
+
+	
+	</style>
+  </head>
+  <body onload="javascript:start();">
+	<div class="container">
+	<div id="connection_status" >Connection status: <span id="connection">Connected</span></div>
+	<table class = "obs_table">
+		<tr>
+			<td width="50%" class="obs_text">Font</td>
+			<td width="50%" class="obs_text">Rear</td>
+		</tr>
+		<tr>
+			<td><div id="front_obs" class="obs"></div></td>
+			<td><div id="rear_obs" class="obs"></div></td>
+		</tr>
+	</table>
+	
+    <div id="joyDiv"></div>
+	
+	<input type="range" id="speed_set" class = "slider" min="1" max="5" value="5" id="spped" onchange="sendSpeed(this.value)">
+	
+	<table id="obs_options" class = "obs_table">
+		<tr>
+			<td colspan="3">Auto obstacle detection</td>
+		</tr>
+		<tr>
+			<td width="45%"><button class="button button2" onclick="javascript:sendObsStatus('E');">Enable</button></td>
+			<td width="10%"><div id="obs_ststus_ind" class="obs"></div></td>
+			<td width="45%"><button class="button button3" onclick="javascript:sendObsStatus('D');">Disable</button></td>
+		</tr>
+	</table>
+	<table class = "obs_table" style="display:block">
+		<tr>
+			<td width="50%"><input type="text" id="current_ip" name="fname" value="" disabled></td>
+			<td width="50%"><button class="button button1" onclick="javascript:start();">Reconnect</button></td>
+		</tr>
+	</table>
+	</div>
+	</body>
+	
+	<script type="text/javascript">
+	// Create JoyStick object into the DIV 'joyDiv'
+	var joy = new JoyStick('joyDiv');
+	var ip = '192.168.0.138';
+	var lastDir = '';
+	var lastSendTime = 0;
+	var lastReceiveTime = 0;
+	
+	var frontClear 	= true;
+	var rearClear 	= true;
+	
+
+	setInterval(function(){ 
+			var d = new Date();
+			if(d.getTime() - lastReceiveTime > 2000){
+				document.getElementById("connection").style.color = "red";
+				document.getElementById("connection").innerHTML  = 'Disconnected';
+			}else{
+				document.getElementById("connection").style.color = "green";
+				document.getElementById("connection").innerHTML  = 'Connected';
+			}
+			
+			var dirc = joy.GetDir() == 'FR'? 'W' : joy.GetDir() == 'FL' ? 'X' : joy.GetDir() == 'BL' ? 'Y' : joy.GetDir() == 'BR' ? 'Z'  : joy.GetDir();
+			if(lastDir!=dirc){
+				sendDirection(dirc);
+				lastDir=dirc;
+			}
+			
+			if(d.getTime() - lastSendTime > 2000){
+				sendActive();
+			}
+			
+			}, 50);
+
+
+	var Socket;
+	function start() {
+		getIP();
+		document.getElementById('speed_set').value=5; 
+		
+		Socket = new WebSocket('ws://' + ip + ':81/');
+		Socket.onmessage = function(evt) {
+		
+		
+		var scktData = evt.data;
+			if(scktData[0]=='O'){
+				var d = new Date();
+				lastReceiveTime = d.getTime();
+				//console.log(lastReceiveTime); 
+				if(scktData[1]=='0'){
+					document.getElementById("front_obs").style.backgroundColor = "green";
+					frontClear = true;
+				}else{
+					document.getElementById("front_obs").style.backgroundColor = "red";
+					frontClear = false;
+				}
+				if(scktData[2]=='0'){
+					document.getElementById("rear_obs").style.backgroundColor = "green";
+					rearClear = true;
+				}else{
+					document.getElementById("rear_obs").style.backgroundColor = "red";
+					rearClear = false;
+				}
+				if(scktData[3]=='E'){
+					document.getElementById("obs_ststus_ind").style.backgroundColor = "green";
+				}else{
+					document.getElementById("obs_ststus_ind").style.backgroundColor = "red";
+				}
+			}
+		}
+	}
+
+	function sendDirection(dir) {
+		Socket.send('D-'+dir);
+		updateLastSendTime();
+	}
+	function sendSpeed(speed) {
+		Socket.send('S-'+speed);
+		updateLastSendTime();
+	}
+	function sendObsStatus(stat) {
+		if(stat=='E'){
+			navigator.vibrate(250);
+		}else{
+			navigator.vibrate(250);
+		}
+		
+		Socket.send('O-'+stat);
+		updateLastSendTime()
+	}
+	function updateLastSendTime() {
+		var d = new Date();
+		lastSendTime = d.getTime();
+	}
+	function sendActive() {
+		Socket.send('A');
+		updateLastSendTime()
+	}
+	
+	function updateIP() {
+		ip = document.getElementById("current_ip").value;
+		alert("IP updated.");
+	}
+	function getIP(){
+		const queryString = window.location.search;
+		const urlParams = new URLSearchParams(queryString);
+		ip = urlParams.get('ip');
+		document.getElementById("current_ip").value = ip;
+	}
+
+    </script>
+    
+  
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="jquery.min.js"></script>
+</head>
+<body>
+
+<textarea name="message" rows="20" cols="30" id="message" onkeyup="process()">
+The cat was playing in the garden.
+</textarea> 
+<br>
+<input type="text" id="var_name" name="Variable name" value="customChar">
+ <button type="button" onclick="generateByte()">Click Me!</button> 
+ <div>Pixels: <span id="x_pixels"></span> X <span id="y_pixels"></span></div>
+ <div>Units: <span id="x_units"></span> X <span id="y_units"></span></div>
+ <code id="result">background-color</code>
+</body>
+<script>
+	var x_units = 0;
+	var y_units = 0;
+$(document).ready(function(){
+ 	
+});
+function process(){
+	var msg = $("#message").val();
+	var characterCount = msg.split(/\n/g);
+
+	var x_pixels = 0;
+	for(i=0;i<characterCount.length;i++){
+		if(characterCount[i].length>x_pixels){
+			x_pixels = characterCount[i].length;
+		}
+	}
+	var y_pixels = characterCount.length;
+
+	$("#x_pixels").html(x_pixels);
+	$("#y_pixels").html(y_pixels);
+
+	x_units = Math.ceil(x_pixels/5);
+	y_units = Math.ceil(y_pixels/8);
+
+	$("#x_units").html(x_units);
+	$("#y_units").html(y_units);
+
+}
+function generateByte(){
+	process();
+	var msg = $("#message").val();
+	var characterCount = msg.split(/\n/g);
+
+	var max_len = $("#x_pixels").html();
+	var max_wid = $("#y_pixels").html();
+
+	for(i=0;i<characterCount.length;i++){
+		if(characterCount[i].length<max_len){
+
+			var x_pixels = characterCount[i].length;
+			var spaces = " ".repeat(max_len-x_pixels);
+			characterCount[i] = characterCount[i]+spaces;
+		}
+		characterCount[i] = characterCount[i].replaceAll('#','1');
+		characterCount[i] = characterCount[i].replaceAll(' ','0');
+	}
+
+	var total_units = x_units * y_units;
+	var all_unit = [total_units];
+
+	var x = 0;
+	for(i=0;i<y_units;i++){
+		for(j=0;j<x_units;j++){
+
+			var each_unit = [8];
+
+			for(p=0;p<8;p++){
+				each_unit[p] = 'B'+characterCount[i*8+p].substring(j*5, j*5+5);
+			}
+			//alert(each_unit);
+			all_unit[x++] = each_unit;
+		}
+	}
+	
+
+	$("#result").html("");
+	for(u=0;u<total_units;u++){
+
+		var each_unit = all_unit[u];
+		var each_str = 'byte '+$("#var_name").val()+u+'[] = {'+each_unit+'};</br>';
+
+
+		$("#result").append(each_str);
+		//alert(each_str);
+
+	}
+	//alert(all_unit);
+
+}
+</script>
+</html>

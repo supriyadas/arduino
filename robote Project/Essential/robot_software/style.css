@@ -1,0 +1,64 @@
+.item1 { grid-area: header; }
+.item2 { grid-area: middle; }
+.item3 { grid-area: footer; }
+
+.item4 { grid-area: ctrl_left; }
+.item5 { grid-area: ctrl_mid; }
+.item6 { grid-area: ctrl_right; }
+
+.item7 { grid-area: info_left; }
+.item8 { grid-area: info_mid; }
+.item9 { grid-area: info_right; }
+
+.grid-container {
+  display: grid;
+  grid-template-areas:
+    'header'
+    'middle'
+    'footer';
+  grid-gap: 10px;
+  background-color: #2196F3;
+  padding: 10px;
+}
+
+.grid-container > div {
+  background-color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  padding: 20px 0;
+  font-size: 30px;
+}
+
+
+
+.button-container {
+  display: grid;
+  grid-template-areas:'ctrl_left ctrl_left ctrl_left ctrl_left ctrl_mid ctrl_right';
+  grid-gap: 10px;
+  padding: 10px;
+}
+
+.info-container {
+  display: grid;
+  grid-template-areas:'info_left info_mid info_right';
+  grid-gap: 0px;
+  padding: 0px;
+}
+
+.ctrl_btn1{
+	display: block;
+    width: 100%;
+    height: 5em;
+}
+.ctrl_btn2{
+	display: block;
+    width: 50%;
+    float: left;
+    height: 10em;
+}
+.btn_pressed{
+	background-color: #ccc;
+}
+
+.item7 td{
+	font-size: .5em;
+}

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="jquery.min.js"></script>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="grid-container">
+  <div class="item1">
+  a
+  </div>
+  <div class="item2">
+	<div class="info-container">
+		<div class="item7">
+			<table>
+			  <tr>
+				<td>BOT IP:</td>
+				<td><input type="text" id="target_ip_bot" value="192.168.0.124" /></td>
+			  </tr>
+			  <tr>
+				<td>CAM IP:</td>
+				<td><input type="text" id="target_ip_cam" value="192.168.0.124" /></td>
+			  </tr>
+			  <tr>
+				<td></td>
+				<td><button onclick="updateIp()">Update</button></td>
+			  </tr>
+			</table>
+		</div>
+		<div class="item8">
+			Car Info
+		</div>
+		<div class="item9">
+			Camera Info
+		</div>
+	</div>
+  </div>
+  <div class="item3">
+	<div class="button-container">
+		<div class="item4">
+			<img id="live_video" src="#" alt="Video feed"/>
+		</div>
+		<div class="item5">
+			<button class="ctrl_btn1" id="ctrl_f">FORWARD</button>
+			<button class="ctrl_btn1" id="ctrl_b">BACKWARD</button>
+		</div>
+		<div class="item6">
+			<button class="ctrl_btn2" id="ctrl_l">LEFT</button>
+			<button class="ctrl_btn2" id="ctrl_r">RIGHT</button>
+		</div>
+	</div>
+  </div>
+</div>
+<script>
+	$("#ctrl_f")
+	  .mouseup(function() { do_stop()})
+	  .mousedown(function() { do_forward()});
+	
+	$("#ctrl_b")
+	  .mouseup(function() { do_stop()})
+	  .mousedown(function() { do_backward()});
+
+	$("#ctrl_r")
+	  .mouseup(function() { do_stop()})
+	  .mousedown(function() { do_right()});
+	  
+	$("#ctrl_l")
+	  .mouseup(function() { do_stop()})
+	  .mousedown(function() { do_left()});
+
+
+	function do_stop(){
+		console. log("Stop");
+		execute_request("S");
+		$("#ctrl_f,#ctrl_b,#ctrl_r,#ctrl_l").each(function(){
+			$(this).removeClass( "btn_pressed" );
+		});
+	}
+
+	function do_forward(){
+		console. log("Forward");
+		execute_request("F");
+		$("#ctrl_f").addClass( "btn_pressed" );
+	}
+
+	function do_backward(){
+		console. log("Backward");
+		execute_request("B");
+		$("#ctrl_b").addClass( "btn_pressed" );
+	}
+
+	function do_right(){
+		console. log("Right");
+		execute_request("R");
+		$("#ctrl_r").addClass( "btn_pressed" );
+	}
+
+	function do_left(){
+		console. log("Left");
+		execute_request("L");
+		$("#ctrl_l").addClass( "btn_pressed" );
+	}
+	
+	function execute_request(state){
+		var ip = $("#target_ip_bot").val();
+		$.get("http://"+ip+"?State="+state);
+	}
+	
+	var lastEvent = "";
+	
+	document.onkeydown = checkKeyDown;
+	
+	function checkKeyDown(e) {
+		
+		if(lastEvent!="keyDown"){
+			e = e || window.event;
+
+			if (e.keyCode == '38') {
+				do_forward();
+			}
+			else if (e.keyCode == '40') {
+				do_backward();
+			}
+			else if (e.keyCode == '37') {
+				do_left();
+			}
+			else if (e.keyCode == '39') {
+				do_right();
+			}
+			lastEvent = "keyDown";
+		}
+	}
+	
+	document.onkeyup = checkKeyUp;
+	
+	function checkKeyUp(e) {
+
+		if(lastEvent!="keyUp"){
+			e = e || window.event;
+
+			if (e.keyCode == '38' || e.keyCode == '40' || e.keyCode == '37' || e.keyCode == '39') {
+				do_stop();
+			}
+			lastEvent = "keyUp";
+		}
+	}
+	
+	function updateIp(){
+	
+		var bot_ip = $("#target_ip_bot").val();
+		var cam_ip = $("#target_ip_cam").val();
+		
+		$("#live_video").attr("src","http://"+cam_ip+":8080/video");
+	}
+</script>
+</body>
+</html>
