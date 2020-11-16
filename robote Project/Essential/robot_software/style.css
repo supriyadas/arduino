@@ -62,3 +62,7 @@
 .item7 td{
 	font-size: .5em;
 }
+#history, #output{
+	width: 47%;
+height: 340px;
+}

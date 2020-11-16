@@ -5,22 +5,20 @@
 #include <Wire.h>
 #include <BlynkSimpleEsp8266.h>
 
-const boolean CONN_TYPE_WIFI_AP = true;
+const boolean CONN_TYPE_WIFI_AP = false;
 
-const char* ssid = "Rio 2";
-const char* password = "123456789";
+const char* ssid = "Supriya_Home";
+const char* password = "apazyaea";
 
-//const char* ssid = "Supriya_Home";
-//const char* password = "apazyaea";
-
-const int M1_IN_1 = D3;
-const int M1_IN_2 = D4;
+const int M1_IN_1 = D5;
+const int M1_IN_2 = D6;
 const int M2_IN_1 = D7;
 const int M2_IN_2 = D8;
+const int BI_LED_PIN = D4;
 
 boolean front_clear = true;
 boolean rear_clear  = true;
-boolean autoDetecction  = true;
+boolean autoDetecction  = false;
 unsigned long lastReceived;
 
 char direc = 'S';
@@ -150,11 +148,11 @@ void mainLoop(){
   
   //Check if connection lost from APP
   
-  if(millis() - lastReceived>4000){
-      stop_motors();
-      direc = 'S';
-     Serial.println("Disconnect");
-  }
+//  if(millis() - lastReceived>4000){
+//      stop_motors();
+//      direc = 'S';
+//     Serial.println("Disconnect");
+//  }
 }
 
 void updateLastReceivedTime() {
@@ -168,7 +166,7 @@ void initSetup() {
   pinMode(M1_IN_2, OUTPUT);   //Left motor
   pinMode(M2_IN_1, OUTPUT);   //Right motor
   pinMode(M2_IN_2, OUTPUT);   //Right motor
-  
+  pinMode(BI_LED_PIN, OUTPUT);
   stop_motors();              //Keep the motor stop  
   Wire.begin(D1, D2);         //Start I2C with Arduino
   lastReceived = millis();    //Set initial time  
@@ -195,6 +193,7 @@ void forward() {
   }else{
     stop_motors();
   }
+  digitalWrite(BI_LED_PIN,HIGH);
 }
 
 void backward() {
@@ -206,6 +205,7 @@ void backward() {
   }else{
     stop_motors();
   }
+  digitalWrite(BI_LED_PIN,HIGH);
 }
 
 void turn_right() {
@@ -213,6 +213,7 @@ void turn_right() {
   digitalWrite(M1_IN_2, HIGH);
   digitalWrite(M2_IN_1, HIGH);
   digitalWrite(M2_IN_2, LOW);
+  digitalWrite(BI_LED_PIN,HIGH);
 }
 
 void turn_front_right() {
@@ -234,6 +235,7 @@ void turn_left() {
   digitalWrite(M1_IN_2, LOW);
   digitalWrite(M2_IN_1, LOW);
   digitalWrite(M2_IN_2, HIGH);
+  digitalWrite(BI_LED_PIN,HIGH);
 }
 
 void turn_front_left() {
@@ -255,4 +257,5 @@ void stop_motors() {
   digitalWrite(M1_IN_2, LOW);
   digitalWrite(M2_IN_1, LOW);
   digitalWrite(M2_IN_2, LOW);
+  digitalWrite(BI_LED_PIN,LOW);
 }

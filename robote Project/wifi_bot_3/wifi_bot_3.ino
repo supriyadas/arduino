@@ -6,30 +6,45 @@ const int IN_1 = D5;
 const int IN_2 = D6;
 const int IN_3 = D7;
 const int IN_4 = D8;
+const int BI_LED_PIN = D4;
 
 ESP8266WebServer server(80);
 String command; 
 String lastCommand;     
 
 void setup() {
-  Serial.begin(115200); 
+	Serial.begin(115200); 
 
-  pinMode(IN_1, OUTPUT);
-  pinMode(IN_2, OUTPUT);
-  pinMode(IN_3, OUTPUT);
-  pinMode(IN_4, OUTPUT); 
-
-  /* Step 1: Configuring ssid and password */
-  String esid = "robo_rob1";
-  String epass = "123456789";
+	pinMode(IN_1, OUTPUT);
+	pinMode(IN_2, OUTPUT);
+	pinMode(IN_3, OUTPUT);
+	pinMode(IN_4, OUTPUT); 
+  pinMode(BI_LED_PIN, OUTPUT); 
+  digitalWrite(BI_LED_PIN, LOW);
+	/* Step 1: Configuring ssid and password */
+	String ssid = "Supriya_Home";
+	String pass = "apazyaea";
   
-  /* Step 2: Creating soft access point */
-  boolean ssidPresent = setupWifiAP(esid, epass);
+	/* Step 2: Creating soft access point */
+	Serial.println("Connecting to ");
+	Serial.println(ssid); 
+	WiFi.begin(ssid, pass); 
+	while (WiFi.status() != WL_CONNECTED) 
+	{
+		delay(500);
+		Serial.print(".");
+	}
+	Serial.println("");
+	Serial.println("WiFi connected");
+
+  //Printing IP address
+	Serial.print("IP address: ");
+	Serial.println(WiFi.localIP());
 
   /* Step 3: Starting WEB-server  */
-   server.on ( "/move", HTTP_handleRoot );
-   server.onNotFound ( HTTP_handleRoot );
-   server.begin();    
+	server.on ( "/move", HTTP_handleRoot );
+	server.onNotFound ( HTTP_handleRoot );
+	server.begin();    
 }
 
 void loop() {
@@ -50,6 +65,7 @@ void goAhead(){
     digitalWrite(IN_2, HIGH);
     digitalWrite(IN_3, LOW);
     digitalWrite(IN_4, HIGH);
+    digitalWrite(BI_LED_PIN, HIGH);
 }
 
 void goBack(){ 
@@ -57,6 +73,7 @@ void goBack(){
     digitalWrite(IN_2, LOW);
     digitalWrite(IN_3, HIGH);
     digitalWrite(IN_4, LOW);
+    digitalWrite(BI_LED_PIN, HIGH);
 }
 
 void goRight(){ 
@@ -64,6 +81,7 @@ void goRight(){
     digitalWrite(IN_2, HIGH);
     digitalWrite(IN_3, HIGH);
     digitalWrite(IN_4, LOW);
+    digitalWrite(BI_LED_PIN, HIGH);
 }
 
 void goLeft(){ 
@@ -71,6 +89,7 @@ void goLeft(){
     digitalWrite(IN_2, LOW);
     digitalWrite(IN_3, LOW);
     digitalWrite(IN_4, HIGH);
+    digitalWrite(BI_LED_PIN, HIGH);
 }
 
 void stopRobot(){ 
@@ -78,6 +97,7 @@ void stopRobot(){
     digitalWrite(IN_2, LOW);
     digitalWrite(IN_3, LOW);
     digitalWrite(IN_4, LOW);
+    digitalWrite(BI_LED_PIN, LOW);
 }
 
 void HTTP_handleRoot(void) {
